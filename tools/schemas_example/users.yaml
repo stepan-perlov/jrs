@@ -1,0 +1,26 @@
+$schema: "http://json-schema.org/draft-04/schema#"
+id: users
+title: users params/result overview
+
+add:
+    params:
+        type: object
+        required: ["name", "password", "group_id", "full_name", "language"]
+        additionalProperties: false
+        properties:
+            name:
+                type: string
+            password:
+                type: string
+            group_id:
+                type: integer
+                min: 0
+            full_name:
+                type: string
+            language:
+                type: string
+    result:
+        type: object
+        properties:
+            id:
+                type: integer

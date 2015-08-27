@@ -1,0 +1,76 @@
+$schema: "http://json-schema.org/draft-04/schema#"
+id: json-rpc
+title: A JSON RPC 2.0 protocol
+
+request:
+    type: object
+    required: ["jsonrpc", "id", "method", "params"]
+    additionalProperties: false
+    properties:
+        jsonrpc:
+            title: JSON RPC protocol version
+            enum: ["2.0"]
+        id:
+            title: Command id - client sequence
+            type: ["integer", "null"]
+        method:
+            title: Remote procedure name
+            type: "string"
+        params:
+            title: Params for remote procedure
+            type: ["object", "null"]
+
+response:
+    oneOf:
+      - type: object
+        required: ["jsonrpc", "id", "method", "result"]
+        additionalProperties: false
+        properties:
+            jsonrpc:
+                title: JSON RPC protocol version
+                enum: ["2.0"]
+            id:
+                title: Command id - client sequence
+                type: ["integer", "null"]
+            method:
+                title: Remote procedure name
+                type: "string"
+            result:
+                title: Remote procedure result
+                type: ["object", "null"]
+      - type: object
+        required: ["jsonrpc", "error"]
+        additionalProperties: false
+        properties:
+            jsonrpc:
+                title: JSON RPC protocol version
+                enum: ["2.0"]
+            id:
+                title: Command id - client sequence
+                type: ["integer", "null"]
+            method:
+                title: Remote procedure name
+                type: "string"
+            error:
+                type: object
+                required: ["code", "message"]
+                properties:
+                    code:
+                        type: integer
+                        minimum: -32768
+                        maximum: -32000
+                    message:
+                        type: text
+                    data:
+                        title: Error details
+                        type: ["object", "array"]
+
+requestBatch:
+    type: array
+    items:
+        $ref: "#/request"
+
+responseBatch:
+    type: array
+    items:
+        $ref: "#/response"

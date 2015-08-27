@@ -1,0 +1,5 @@
+/build/*
+/python/dist/*
+/python/jrs.egg-info/*
+/tools/dist/*
+/tools/jrstools.egg-info/*
