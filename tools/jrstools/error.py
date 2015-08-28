@@ -11,3 +11,7 @@ class JrsSchemaError(JrsError):
 
 class JrsExportError(JrsError):
     pass
+
+
+class JrsMakeError(JrsError):
+    pass

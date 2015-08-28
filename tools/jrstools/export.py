@@ -31,12 +31,14 @@ def export_js(fpath, schemas):
     if not os.path.exists(os.path.dirname(fpath)):
         raise JrsExportError("Path not exists '{}'".format(os.path.dirname(fpath)))
 
-    for key, sch in schemas.iteritems():
-        schemas[key] = unicode(json.dumps(sch, indent=2, separators=(',', ': ')))
-
     with io.open(fpath, "w", encoding="utf-8") as fstream:
-        fstream.write(
-            j2.get_template("export_js.j2").render({
-                "schemas": schemas
-            })
-        )
+        fstream.write(j2.get_template("export_js.j2").render({
+            "schemas": dict([
+                (
+                    key, unicode(
+                        json.dumps(sch, indent=2, separators=(',', ': '))
+                    )
+                )
+                for key, sch in schemas.iteritems()
+            ])
+        }))

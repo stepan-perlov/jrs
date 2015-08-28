@@ -1,6 +1,9 @@
-$schema: "http://json-schema.org/draft-04/schema#"
 id: json-rpc
 title: A JSON RPC 2.0 protocol
+description: |
+    | Описание запросов - ответов протокола.
+    | Протокол поддерживает вызов одной или нескольких комманд.
+type: jrs
 
 request:
     type: object

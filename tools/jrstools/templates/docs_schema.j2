@@ -1,0 +1,39 @@
+{{schema.title or schema.id}}
+{{schema.title or schema.id | emphasize("=")}}
+
+{% if schema.description %}
+{{schema.description}}
+{% endif %}
+
+{% for key, value in schema.iteritems() %}
+{% if value.type == "jrs" %}
+{{value.title or key}}
+{{value.title or key | emphasize("-")}}
+{% if value.description %}
+
+{{value.description}}
+{% endif %}
+
+**params:**
+
+{% with subschema = value.params, key = "params", indentlvl = 1 %}
+{# this is json-schema for method params #}
+{% include "docs_subschema.j2" %}
+{% endwith %}
+{% if value.result %}
+{# result schema is optional #}
+
+**result:**
+
+{% with subschema = value.result, key = "result", indentlvl = 1 %}
+{# this is json-schema for method result #}
+{% include "docs_subschema.j2" %}
+{% endwith %}
+{% endif %}
+{% elif value | type(dict) %}
+{# this is json-shema #}
+{% with subschema = value, key = key, indentlvl = 0 %}
+{% include "docs_subschema.j2" %}
+{% endwith %}
+{% endif %}
+{% endfor %}

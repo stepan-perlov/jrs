@@ -1,8 +1,11 @@
-$schema: "http://json-schema.org/draft-04/schema#"
 id: users
-title: users params/result overview
+title: Описание api модуля users
+description: |
+    | Модуль содержит команды для управления пользователя.
+type: jrs
 
 add:
+    type: jrs
     params:
         type: object
         required: ["name", "password", "group_id", "full_name", "language"]

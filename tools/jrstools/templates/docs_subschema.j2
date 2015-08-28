@@ -1,0 +1,16 @@
+{{subschema.title or key | indent(indentlvl * 4, true)}}
+{{(subschema.title or key | emphasize("~")) | indent(indentlvl * 4, true)}}
+
+{% if subschema.keys() | intersectionAny(["allOf", "anyOf", "oneOf"]) %}
+{% set keyOf = subschema.keys() | intersectionValue(["allOf", "anyOf", "oneOf"]) %}
+{% for value in subschema[keyOf] %}
+{% with subschema = value, key = "{}. {}".format(loop.index, keyOf), indentlvl = indentlvl + 1 %}
+{% include "docs_subschema.j2" %}
+{% endwith %}
+{% endfor %}
+{% elif subschema.type == "object" %}
+{% if subschema.required %}
+{{("Required: " + ", ".join(subschema.required)) | indent(indentlvl * 4, true)}}
+
+{% endif %}
+{% endif %}
