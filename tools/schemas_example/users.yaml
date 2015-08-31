@@ -1,11 +1,9 @@
 id: users
 title: Описание api модуля users
 description: |
-    | Модуль содержит команды для управления пользователя.
-type: jrs
+    Модуль содержит команды для управления пользователя.
 
 add:
-    type: jrs
     params:
         type: object
         required: ["name", "password", "group_id", "full_name", "language"]

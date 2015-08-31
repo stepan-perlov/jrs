@@ -1,16 +1,43 @@
-{{subschema.title or key | indent(indentlvl * 4, true)}}
-{{(subschema.title or key | emphasize("~")) | indent(indentlvl * 4, true)}}
-
+{# checking keys existing in object #}
 {% if subschema.keys() | intersectionAny(["allOf", "anyOf", "oneOf"]) %}
-{% set keyOf = subschema.keys() | intersectionValue(["allOf", "anyOf", "oneOf"]) %}
-{% for value in subschema[keyOf] %}
-{% with subschema = value, key = "{}. {}".format(loop.index, keyOf), indentlvl = indentlvl + 1 %}
+    {# set existing key name #}
+    {% set keyOf = subschema.keys() | intersectionValue(["allOf", "anyOf", "oneOf"]) %}
+    {% for value in subschema[keyOf] %}
+        {% with subschema = value, key = "{}. {}".format(loop.index, keyOf), indentlvl = indentlvl + 1 %}
 {% include "docs_subschema.j2" %}
-{% endwith %}
-{% endfor %}
-{% elif subschema.type == "object" %}
-{% if subschema.required %}
-{{("Required: " + ", ".join(subschema.required)) | indent(indentlvl * 4, true)}}
+        {% endwith %}
+    {% endfor %}
+{% elif subschema.properties %}
+{% if key in ["params", "result"] %}>{% endif %}### {{key}}{% if subschema.title %}: {{subschema.title}}{% endif %}
 
-{% endif %}
+    {% if subschema.required %}
+>{{("Required: " + ", ".join(subschema.required))}}
+>
+    {% endif %}
+>|Name|Type|Description|
+>|-|-|-|
+    {% for key, value in subschema.properties.iteritems() %}
+        {% if value["resolved_$ref"] %}
+>|{{key}}|$ref:{{value["resolved_$ref"]}}||
+        {% else %}
+>|{{key}}|{{value.type}}|{{value.description}}|
+        {% endif %}
+    {% endfor %}
+{% elif subschema.type == "array" %}
+### {{key}}{% if subschema.title %}: {{subschema.title}}{% endif %}
+
+    {% if subschema["items"]["resolved_$ref"] %}
+>Array of: {{subschema["items"]["resolved_$ref"]}}
+    {% elif subschema["items"].properties %}
+        {% for key, value in subschema["items"].properties.iteritems() %}
+            {% if value["resolved_$ref"] %}
+>|{{key}}|$ref:{{value["resolved_$ref"]}}||
+            {% else %}
+>|{{key}}|{{value.type}}|{{value.description}}|
+            {% endif %}
+        {% endfor %}
+    {% else %}
+>Array of: {{subschema.type}}
+    {% endif %}
+>
 {% endif %}

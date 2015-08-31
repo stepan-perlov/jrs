@@ -29,21 +29,20 @@ def make_docs(
         os.mkdir(SCHEMAS_DIR)
 
     index_dir, index_name = index_path.rsplit("/", 1)
-    j2_index = Environment(loader=FileSystemLoader(index_dir), trim_blocks=True, lstrip_blocks=False)
+    j2_index = Environment(loader=FileSystemLoader(index_dir), trim_blocks=True, lstrip_blocks=True)
     docs_index = j2_index.get_template(index_name)
 
-    with io.open(os.path.join(dst, "index.rst"), "w", encoding="utf-8") as fstream:
+    with io.open(os.path.join(dst, "index.md"), "w", encoding="utf-8") as fstream:
         fstream.write(docs_index.render({"schemas": schemas}))
 
     schema_dir, schema_name = schema_path.rsplit("/", 1)
-    j2_schema = Environment(loader=FileSystemLoader(schema_dir), trim_blocks=True, lstrip_blocks=False,
+    j2_schema = Environment(loader=FileSystemLoader(schema_dir), trim_blocks=True, lstrip_blocks=True,
         extensions=["jinja2.ext.with_"])
-    j2_schema.filters["emphasize"] = lambda value, symbol: symbol * len(value)
     j2_schema.filters["type"] = lambda value, expected: type(value) == expected
     j2_schema.filters["intersectionAny"] = lambda arr1, arr2: len(set(arr1).intersection(arr2)) > 0
     j2_schema.filters["intersectionValue"] = lambda arr1, arr2: list(set(arr1).intersection(arr2))[0]
     docs_schema = j2_schema.get_template(schema_name)
 
     for sch in schemas.itervalues():
-        with io.open(os.path.join(SCHEMAS_DIR, sch["id"] + ".rst"), "w", encoding="utf-8") as fstream:
+        with io.open(os.path.join(SCHEMAS_DIR, sch["id"] + ".md"), "w", encoding="utf-8") as fstream:
             fstream.write(docs_schema.render({"schema": sch}))
