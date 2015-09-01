@@ -5,6 +5,7 @@ import subprocess
 
 import yaml
 
+from node import Node
 from error import JrsSchemaError
 
 
@@ -20,55 +21,24 @@ def load_schemas(root):
     return schemas
 
 
-def _replace_ref(value, node_key, parent, root, store):
-    if not type(value) in [str, unicode]:
-        raise JrsSchemaError("Invalid $ref value type(allowed str, unicode) - {}. node - {}.{}".format(value, parent, node_key))
-
-    try:
-        index = value.index("#")
-        if index != value.rindex("#"):
-            raise JrsSchemaError("Invalid $ref value(exists more than one '#') - {}. node - {}.{}".format(value, parent, node_key))
-
-        if index == 0:
-            path = value.strip("#")
-            obj = root
-        else:
-            split = value.split("#")
-            obj = store[split[1]]
-            path = split[2]
-
-        if path == "":
-            parent[node_key] = deepcopy(obj)
-        elif path.startswith("/"):
-            for key in path.lstrip("/").split("/"):
-                obj = obj[key]
-            parent[node_key] = deepcopy(obj)
-        else:
-            raise JrsSchemaError("Invalid $ref value(after '#' must be '/') - {}. node - {}.{}".format(value, parent, node_key))
-
-        parent[node_key]["resolved_$ref"] = value
-
-    except ValueError:
-        raise JrsSchemaError("Invalid $ref value('#' not exists) - {}. node - {}.{}".format(value, parent, node_key))
-
-
-def _resolve_refs(node, node_key, parent, root, store):
-    if type(node) == dict:
-        for key, value in node.iteritems():
-            if key == "$ref":
-                _replace_ref(value, node_key, parent, root, store)
-            elif type(value) in [dict, list]:
-                _resolve_refs(value, key, node, root, store)
-    elif type(node) == list:
-        for i, value in enumerate(node):
-            if type(value) in [dict, list]:
-                _resolve_refs(value, i, node, root, store)
+def resolve_ref(node):
+    for child in node.childs():
+        if child.is_ref:
+            child.replace_ref()
+        elif child.is_dict or child.is_list:
+            resolve_ref(child)
 
 
 def resolve_schemas(schemas):
+    Node.set_schemas(schemas)
     for sch in schemas.itervalues():
         if "$ref" in unicode(sch):
-            _resolve_refs(sch, None, None, sch, schemas)
+            resolve_ref(Node(
+                key=None,
+                node=sch,
+                parent=None,
+                root=sch
+            ))
         for schKey, schValue in sch.iteritems():
             if type(schValue) == dict:
                 schValue["$schema"] = "http://json-schema.org/draft-04/schema#"
