@@ -21,12 +21,12 @@ def load_schemas(root):
     return schemas
 
 
-def resolve_ref(node):
+def resolve_ref(node, local):
     for child in node.childs():
-        if child.is_ref:
+        if (local and child.is_local_ref()) or (not local and child.is_global_ref()):
             child.replace_ref()
         elif child.is_dict or child.is_list:
-            resolve_ref(child)
+            resolve_ref(child, local)
 
 
 def resolve_schemas(schemas):
@@ -38,10 +38,16 @@ def resolve_schemas(schemas):
                 node=sch,
                 parent=None,
                 root=sch
-            ))
-        for schKey, schValue in sch.iteritems():
-            if type(schValue) == dict:
-                schValue["$schema"] = "http://json-schema.org/draft-04/schema#"
+            ), local=True)
+
+    for sch in schemas.itervalues():
+        if "$ref" in unicode(sch):
+            resolve_ref(Node(
+                key=None,
+                node=sch,
+                parent=None,
+                root=sch
+            ), local=False)
 
     return schemas
 

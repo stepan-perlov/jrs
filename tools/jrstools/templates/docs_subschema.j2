@@ -1,15 +1,15 @@
+{% if key in ["params", "result"] %}>{% endif %}### {{key}}{% if subschema.title %}: {{subschema.title}}{% endif %}
+
 {# checking keys existing in object #}
 {% if subschema.keys() | intersectionAny(["allOf", "anyOf", "oneOf"]) %}
     {# set existing key name #}
     {% set keyOf = subschema.keys() | intersectionValue(["allOf", "anyOf", "oneOf"]) %}
     {% for value in subschema[keyOf] %}
-        {% with subschema = value, key = "{}. {}".format(loop.index, keyOf), indentlvl = indentlvl + 1 %}
+        {% with subschema = value, key = loop.index | string, indentlvl = indentlvl + 1 %}
 {% include "docs_subschema.j2" %}
         {% endwith %}
     {% endfor %}
 {% elif subschema.properties %}
-{% if key in ["params", "result"] %}>{% endif %}### {{key}}{% if subschema.title %}: {{subschema.title}}{% endif %}
-
     {% if subschema.required %}
 >{{("Required: " + ", ".join(subschema.required))}}
 >
@@ -20,12 +20,10 @@
         {% if value["resolved_$ref"] %}
 >|{{key}}|$ref:{{value["resolved_$ref"]}}||
         {% else %}
->|{{key}}|{{value.type}}|{{value.description}}|
+>|{{key}}|{{value.type or (value.enum and "enum")}}|{{value.description}}|
         {% endif %}
     {% endfor %}
 {% elif subschema.type == "array" %}
-### {{key}}{% if subschema.title %}: {{subschema.title}}{% endif %}
-
     {% if subschema["items"]["resolved_$ref"] %}
 >Array of: {{subschema["items"]["resolved_$ref"]}}
     {% elif subschema["items"].properties %}

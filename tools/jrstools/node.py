@@ -31,6 +31,12 @@ class Node(object):
             self.ref["path"] = path
             self.ref["context"] = self.schemas[schemaId]
 
+    def is_local_ref(self):
+        return self.is_ref and self.value["$ref"].index("#") == 0
+
+    def is_global_ref(self):
+        return self.is_ref and self.value["$ref"].index("#") != 0
+
     def replace_ref(self):
         if self.ref["path"] == "":
             self.parent[self.key] = deepcopy(self.ref["context"])
