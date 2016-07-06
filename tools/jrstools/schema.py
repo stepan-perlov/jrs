@@ -40,14 +40,25 @@ def resolve_schemas(schemas):
                 root=sch
             ), local=True)
 
-    for sch in schemas.itervalues():
-        if "$ref" in unicode(sch):
-            resolve_ref(Node(
-                key=None,
-                node=sch,
-                parent=None,
-                root=sch
-            ), local=False)
+    iteration = 0
+    while True:
+        noRef = True
+        for sch in schemas.itervalues():
+            if "$ref" in unicode(sch):
+                resolve_ref(Node(
+                    key=None,
+                    node=sch,
+                    parent=None,
+                    root=sch
+                ), local=False)
+                noRef = False
+        iteration += 1
+
+        if noRef:
+            break
+
+        if iteration == 10:
+            raise Exception("Have unresolved local refs on one iteration")
 
     return schemas
 
