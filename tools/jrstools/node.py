@@ -22,20 +22,13 @@ class Node(object):
 
     def _set_ref(self):
         if self.value["$ref"].index("#") == 0:
-            self.ref["path"] = self.value["$ref"].strip("#")
-            self.ref["context"] = self.root
-        else:
-            schemaId, path = self.value["$ref"].split("#")
-            if not schemaId in self.schemas:
-                raise JrsNodeError(u"Schema not exists", self)
-            self.ref["path"] = path
-            self.ref["context"] = self.schemas[schemaId]
+            raise Exception("Supports only global refs")
 
-    def is_local_ref(self):
-        return self.is_ref and self.value["$ref"].index("#") == 0
-
-    def is_global_ref(self):
-        return self.is_ref and self.value["$ref"].index("#") != 0
+        schemaId, path = self.value["$ref"].split("#")
+        if not schemaId in self.schemas:
+            raise JrsNodeError(u"Schema not exists", self)
+        self.ref["path"] = path
+        self.ref["context"] = self.schemas[schemaId]
 
     def replace_ref(self):
         if self.ref["path"] == "":
@@ -49,7 +42,7 @@ class Node(object):
                     raise JrsNodeError(u"Can't resolve ref path", self)
             self.parent[self.key] = deepcopy(res)
 
-        self.parent[self.key]["resolved_$ref"] = self.value["$ref"]
+        self.parent[self.key]["resolved_ref"] = self.value["$ref"]
 
     def __init__(self, key, node, parent, root):
         self.value = node

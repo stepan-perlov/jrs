@@ -21,44 +21,39 @@ def load_schemas(root):
     return schemas
 
 
-def resolve_ref(node, local):
+def resolve_ref(node):
     for child in node.childs():
-        if (local and child.is_local_ref()) or (not local and child.is_global_ref()):
+        if child.is_ref:
             child.replace_ref()
-        elif child.is_dict or child.is_list:
-            resolve_ref(child, local)
+        if child.is_dict or child.is_list:
+            resolve_ref(child)
 
 
 def resolve_schemas(schemas):
     Node.set_schemas(schemas)
-    for sch in schemas.itervalues():
-        if "$ref" in unicode(sch):
-            resolve_ref(Node(
-                key=None,
-                node=sch,
-                parent=None,
-                root=sch
-            ), local=True)
+
+    import json
 
     iteration = 0
     while True:
         noRef = True
         for sch in schemas.itervalues():
             if "$ref" in unicode(sch):
-                resolve_ref(Node(
+                node = Node(
                     key=None,
                     node=sch,
                     parent=None,
                     root=sch
-                ), local=False)
+                )
+                resolve_ref(node)
                 noRef = False
         iteration += 1
 
         if noRef:
             break
 
-        if iteration == 10:
-            raise Exception("Have unresolved local refs on one iteration")
+        if iteration > 10:
+            raise Exception("Something wrong in ref resolver")
 
     return schemas
 
@@ -69,8 +64,8 @@ def _clear_recursive(node):
             del node["title"]
         if "description" in node:
             del node["description"]
-        if "resolved_$ref" in node:
-            del node["resolved_$ref"]
+        if "resolved_ref" in node:
+            del node["resolved_ref"]
 
         for value in node.itervalues():
             _clear_recursive(value)

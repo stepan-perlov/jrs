@@ -11,9 +11,10 @@ def pip():
 
 @task
 def mezzo():
+    local("rm -rf build/jrstools")
     local("mkdir -p build/jrstools")
     local("cp -r tools/jrstools build/jrstools/jrstools")
     local("cp tools/setup.py build/jrstools/setup.py")
     with lcd("build"):
-        local("tar cf jrstools.tar.gz jrstools")
+        local("tar cfz jrstools.tar.gz jrstools")
         local("cp jrstools.tar.gz /opt/mezzo/dependencies/jrstools.tar.gz")

@@ -17,19 +17,19 @@
 >|Name|Type|Description|
 >|-|-|-|
     {% for key, value in subschema.properties.iteritems() %}
-        {% if value["resolved_$ref"] %}
->|{{key}}|$ref:{{value["resolved_$ref"]}}||
+        {% if value["resolved_ref"] %}
+>|{{key}}|$ref:{{value["resolved_ref"]}}||
         {% else %}
 >|{{key}}|{{value.type or (value.enum and "enum")}}|{{value.description}}|
         {% endif %}
     {% endfor %}
 {% elif subschema.type == "array" %}
-    {% if subschema["items"]["resolved_$ref"] %}
->Array of: {{subschema["items"]["resolved_$ref"]}}
+    {% if subschema["items"]["resolved_ref"] %}
+>Array of: {{subschema["items"]["resolved_ref"]}}
     {% elif subschema["items"].properties %}
         {% for key, value in subschema["items"].properties.iteritems() %}
-            {% if value["resolved_$ref"] %}
->|{{key}}|$ref:{{value["resolved_$ref"]}}||
+            {% if value["resolved_ref"] %}
+>|{{key}}|$ref:{{value["resolved_ref"]}}||
             {% else %}
 >|{{key}}|{{value.type}}|{{value.description}}|
             {% endif %}
